@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fuel_tool_form" model="ir.ui.view">
+        <field name="name">fuel.tool.form</field>
+        <field name="model">fuel.tool</field>
+        <field name="arch" type="xml">
+            <form save="false" create="false">
+                <sheet>
+                    <group>
+                        <field name="file" widget="file"/>
+                    </group>
+                        <button name="import_xlm" string="Importar" type="object" class="o_highlight"/>
+                    <group>
+                        <field name="block_result" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page>
+                            <field name="report">
+                                <tree edit="false" create="false">
+                                    <field name="id"/>
+                                    <field name="month"/>
+                                    <field name="date"/>
+                                    <field name="hour"/>
+                                    <field name="supplier"/>
+                                    <field name="token"/>
+                                    <field name="license_plate"/>
+                                    <field name="kilometer"/>
+                                    <field name="gallons"/>
+                                    <field name="fuel_type"/>
+                                    <field name="prices"/>
+                                    <field name="real_prices"/>
+                                    <field name="inv_prices"/>
+                                    <field name="difference"/>
+                                    <field name="ticket_number"/>
+                                    <field name="responsable"/>
+                                    <field name="location"/>
+                                    <field name="commentary"/>
+                                    <field name="payment_type"/>
+                                    <field name="partner"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--<record id="fuel_tool_tree" model="ir.ui.view">-->
+        <!--<field name="name">fuel.tool.tree</field>-->
+        <!--<field name="model">fuel.tool</field>-->
+        <!--<field name="arch" type="xml">-->
+            <!--<tree>-->
+
+            <!--</tree>-->
+        <!--</field>-->
+    <!--</record>-->
+
+    <record id="fuel_tool_action" model="ir.actions.act_window">
+        <field name="name">Fuel Tool</field>
+        <field name="res_model">fuel.tool</field>
+        <field name="view_mode">form</field>
+        <field name="view_type">form</field>
+    </record>
+
+    <menuitem
+        id="fuel_tool_main_menu"
+        name="Fuel Tool"
+        action="fuel_tool_action"
+    />
+
+</odoo>
