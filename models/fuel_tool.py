@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 import base64
-
 import datetime
 import xlrd
+from sys import platform
 from odoo import models, fields, api, _
 _logger = logging.getLogger(__name__)
 
@@ -189,10 +189,17 @@ class FuelToolSheet(models.TransientModel):
     binary_string = fields.Char('Descargar XML')
 
     def download_xml(self):
-        xml_write = open('C:\Users\openpgsvc\comp_file.xml', 'w')
-        xml_write.write(self.report)
-        xml_write.close()
-        xml_read = open('C:\Users\openpgsvc\comp_file.xml', 'r')
+        if platform == 'win32':
+            xml_write = open('C:\Users\openpgsvc\comp_file.xml', 'w')
+            xml_write.write(self.report)
+            xml_write.close()
+            xml_read = open('C:\Users\openpgsvc\comp_file.xml', 'r')
+        elif platform == 'linux2':
+            xml_write = open('/home/administrator/comp_file.xml', 'w')
+            xml_write.write(self.report)
+            xml_write.close()
+            xml_read = open('/home/administrator/comp_file.xml', 'r')
+            
         self.write({
             'binary_string': 'fuel_file.xml',
             'binary_xml': base64.encodestring(xml_read.read())
