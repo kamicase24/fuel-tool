@@ -14,6 +14,24 @@ class FuelTool(models.Model):
     file = fields.Binary(string='File')
     block_result = fields.Text(string='Resultado')
     report = fields.Many2many('fuel.tool.report', string='Reporte')
+    report_tag = fields.Many2many('fuel.tool.report', string='Excluidos')
+
+    def generate_xml(self):
+
+        view_ref = self.env['ir.model.data'].get_object_reference('fuel_tool', 'fuel_tool_xml_form')
+        view_id = view_ref[1] if view_ref else False
+
+        self.create_xml()
+
+        return {
+            'name': 'XML',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'fuel.tool.xml',
+            'view_id': view_id,
+            'type': 'ir.actions.act_window',
+            'target': 'new'
+        }
 
     def import_xlm(self):
         excel = xlrd.open_workbook(file_contents=base64.decodestring(self.file))
@@ -24,13 +42,13 @@ class FuelTool(models.Model):
                 row_list = []
                 for col in range(sheet.ncols):
                     value = sheet.cell(row, col).value
-                    if sheet.cell(row, col).ctype == 3 and col == 2:
+                    if sheet.cell(row, col).ctype == 3 and col == 1:
                         xls_date = xlrd.xldate_as_tuple(value, excel.datemode)
                         year, month, day, hour, minute, second = xls_date
                         real_date = datetime.date(year, month, day).strftime('%d/%m/%y')
                         value = real_date
 
-                    elif sheet.cell(row, col).ctype == 3 and col == 3:
+                    elif sheet.cell(row, col).ctype == 3 and col == 2:
                         if value > 0 and value < 1:
                             xls_date = xlrd.xldate_as_tuple(value, excel.datemode)
                             year, month, day, hour, minute, second = xls_date
@@ -44,8 +62,6 @@ class FuelTool(models.Model):
                     row_list.append(value)
                 _sheet.append(row_list)
 
-        # [u'Item', u'Mes', u'Fecha', u'Hora', u'Suplidor', u'Ficha', u'Placa', u'Kilometraje', u'Galones', u'Combustible', u'Precio', u'Precio Real', u'Precio Factura', u'Diferencia', u'# Ticket', u'Responsable', u'Oficina', u'Comentario', u'Observacion', u'Empresa']
-        # [2.0, u'Enero', '01/02/17', '08:00:00', u'Mazara Comercial & Asocs. S.R.L.', 201.0, 281017.0, 130300.0, 6.0, u'Gasolina Regular', 195.2, 1171.1999999999998, 1171.0, 0.1999999999998181, 8366.0, u'felix sanchez', u'comercial san pedro de macoris', u'', u'tarjeta', u'DANAKY']
         self.update_report(_sheet)
 
         self.block_result = _sheet
@@ -55,61 +71,147 @@ class FuelTool(models.Model):
         sql = 'delete from fuel_tool_report'
         self.env.cr.execute(sql)
 
-        i=0
+        i = 0
         fuel_report = self.env['fuel.tool.report']
         for line in sheet:
             if i == 0:
                 i = 1
             else:
                 fuel_report.create({
-                    'month': line[1],
-                    'date': line[2],
-                    'hour': line[3],
-                    'supplier': line[4],
-                    'token': line[5],
-                    'license_plate': line[6],
-                    'kilometer': line[7],
-                    'gallons': line[8],
-                    'fuel_type': line[9],
-                    'prices': line[10],
-                    'real_prices': line[11],
-                    'inv_prices': line[12],
-                    'difference': line[13],
-                    'ticket_number': line[14],
-                    'responsable': line[15],
-                    'location': line[16],
-                    'commentary': line[17],
-                    'payment_type': line[18],
-                    'partner': line[19],
-                    # 'partner': line[20],
+                    # 'month': line[1],
+                    'date': line[1],
+                    'hour': line[2],
+                    'supplier': line[3],
+                    'token': line[4],
+                    'license_plate': line[5],
+                    'kilometer': line[6],
+                    'gallons': line[7],
+                    'fuel_type': line[8],
+                    'prices': line[9],
+                    'real_prices': line[10],
+                    'inv_prices': line[11],
+                    'difference': line[12],
+                    'ticket_number': line[13],
+                    'responsable': line[14],
+                    'location': line[15],
+                    'commentary': line[16],
+                    'payment_type': line[17],
+                    'partner': line[18],
                 })
 
         self.report = fuel_report.search([])
 
+    def create_xml(self):
+
+        fuel_report = self.env['fuel.tool.report'].search([])
+        print fuel_report
+
+        template = '<?xml version="1.0" encoding="utf-8"?>\n'
+        template += '<Fuel fileid="'+str(datetime.datetime.now())+'">\n'
+        for line in fuel_report:
+            template += '\t<Refills>\n'
+            template += '\t\t<Refill>\n'
+            template += '\t\t\t<VehicleID>'+line.token+'</VehicleID>\n'
+            template += '\t\t\t<TimeStamp>'+line.date+'T'+line.hour+'</TimeStamp>\n'
+            template += '\t\t\t<Volume>'+str(line.gallons)+'</Volume>\n'
+            template += '\t\t\t<CustomFields>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Tipo de combustible</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.fuel_type+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Costo del combustible</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+str(line.prices)+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Monto de la recarga</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+str(line.inv_prices)+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Comentario</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.commentary+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Suplidor</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.supplier+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Localidad</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.location+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Numero de Ticket</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.ticket_number+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Numero de Factura</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue></CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Modalidad de pago</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.payment_type+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t\t<CustomField>\n'
+            template += '\t\t\t\t\t<CustomFieldName>Empresa</CustomFieldName>\n'
+            template += '\t\t\t\t\t<CustomFieldValue>'+line.partner+'</CustomFieldValue>\n'
+            template += '\t\t\t\t</CustomField>\n'
+
+            template += '\t\t\t</CustomFields>\n'
+            template += '\t\t</Refill>\n'
+            template += '\t</Refills>\n'
+        template += '</Fuel>'
+
+        sql = 'delete from fuel_tool_xml'
+        self.env.cr.execute(sql)
+        sql = "insert into fuel_tool_xml (report) values ('%s')" % template
+        self.env.cr.execute(sql)
+
 
 class FuelToolSheet(models.TransientModel):
-    _name = 'fuel.tool.sheet'
+    _name = 'fuel.tool.xml'
 
-    report = fields.Many2one('fuel.tool.report', string='Reporte')
+    def _default_report(self):
+
+        return self.env['fuel.tool.xml'].search([]).report
+
+    report = fields.Text(string='Reporte', default=_default_report)
+    binary_xml = fields.Binary(string='Descargar XML')
+    binary_string = fields.Char('Descargar XML')
+
+    def download_xml(self):
+        xml_write = open('C:\Users\openpgsvc\comp_file.xml', 'w')
+        xml_write.write(self.report)
+        xml_write.close()
+        xml_read = open('C:\Users\openpgsvc\comp_file.xml', 'r')
+        self.write({
+            'binary_string': 'fuel_file.xml',
+            'binary_xml': base64.encodestring(xml_read.read())
+        })
+        return {'type': 'ir.action.do_nothing'}
 
 
 class FuelToolReport(models.Model):
     _name = 'fuel.tool.report'
 
-    # [u'Item', u'  Mes', u'Fecha', u'Hora', u'Suplidor', u'Ficha', u'Placa', u'Kilometraje', u'Galones', u'Combustible', u'Precio', u'Precio Real', u'Precio Factura', u'Diferencia', u'# Ticket', u'Responsable', u'Oficina', u'Comentario', u'Observacion', u'Empresa']
     month = fields.Char(string='Mes')
-    date = fields.Date(string='Día, Mes y Año')
-    hour = fields.Char(string='Hora')
+    date = fields.Date(string='Día, Mes y Año', required=True)
+    hour = fields.Char(string='Hora', required=True)
     supplier = fields.Char(string='Suplidor')
-    token = fields.Char(string='Ficha')
+    token = fields.Char(string='Ficha/VehicleId', required=True)
     license_plate = fields.Char(string='Placa')
     kilometer = fields.Char(string='Kilometraje')
-    gallons = fields.Float(string='Galones')
+    gallons = fields.Float(string='Galones/Volume', required=True)
     fuel_type = fields.Char(string='Combustible')
-    # fuel_type = fields.Selection([('Gasolina Regular', 'Gasolina Regular'),
-    #                               ('Gasoil Regular', 'Gasoil Regular'),
-    #                               ('Gasolina Premium', 'Gasolina Premium'),
-    #                               ('Gasoil Premium', 'Gasoil Premium')], string='Combustible')
     prices = fields.Float(string='Precios')
     real_prices = fields.Float(string='Precios Reales')
     inv_prices = fields.Float(string='Precios Facturados')
@@ -121,5 +223,3 @@ class FuelToolReport(models.Model):
     payment_type = fields.Char(string='Tipo de Pago')
     partner = fields.Char(string='Empresa')
     brigade = fields.Char(string='Brigada')
-    # payment_type = fields.Selection([('credito', 'Credito'), ('tarjeta', 'Tarjeta')], string='Tipo de Pago')
-    # partner_id = fields.One2Many('res_partner', string='Empresa', domain='[("customer","=",True)]')

@@ -5,43 +5,67 @@
         <field name="model">fuel.tool</field>
         <field name="arch" type="xml">
             <form save="false" create="false">
-                <sheet>
+                <header>
+                    <button name="import_xlm"
+                            string="Importar"
+                            type="object"
+                            class="oe_highlight"
+                    />
+                    ->
+                    <button name="generate_xml"
+                            string="XML"
+                            type="object"
+                            class="oe_highlight"
+                    />
+                </header>
+                <field name="block_result" invisible="1"/>
+                <group>
                     <group>
                         <field name="file" widget="file"/>
+                        <field name="excluded"/>
                     </group>
-                        <button name="import_xlm" string="Importar" type="object" class="o_highlight"/>
-                    <group>
-                        <field name="block_result" invisible="1"/>
-                    </group>
-                    <notebook>
-                        <page>
-                            <field name="report">
-                                <tree edit="false" create="false">
-                                    <field name="id"/>
-                                    <field name="month"/>
-                                    <field name="date"/>
-                                    <field name="hour"/>
-                                    <field name="supplier"/>
-                                    <field name="token"/>
-                                    <field name="license_plate"/>
-                                    <field name="kilometer"/>
-                                    <field name="gallons"/>
-                                    <field name="fuel_type"/>
-                                    <field name="prices"/>
-                                    <field name="real_prices"/>
-                                    <field name="inv_prices"/>
-                                    <field name="difference"/>
-                                    <field name="ticket_number"/>
-                                    <field name="responsable"/>
-                                    <field name="location"/>
-                                    <field name="commentary"/>
-                                    <field name="payment_type"/>
-                                    <field name="partner"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
-                </sheet>
+                </group>
+                <notebook>
+                    <page string="Lineas de Reporte">
+                        <field name="report" readonly="1">
+                            <tree edit="false" create="false" colors="red: gallons == 0" default_order="gallons">
+                                <field name="id" invisible="1"/>
+                                <!--<field name="month"/>-->
+                                <field name="token"/>
+                                <field name="date"/>
+                                <field name="hour"/>
+                                <field name="gallons"/>
+                                <field name="supplier"/>
+                                <field name="license_plate"/>
+                                <field name="kilometer"/>
+                                <field name="fuel_type"/>
+                                <field name="prices"/>
+                                <field name="real_prices"/>
+                                <field name="inv_prices"/>
+                                <field name="difference"/>
+                                <field name="ticket_number"/>
+                                <field name="responsable"/>
+                                <field name="location"/>
+                                <field name="commentary"/>
+                                <field name="payment_type"/>
+                                <field name="partner"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+
+    <record id="fuel_tool_xml_form" model="ir.ui.view">
+        <field name="name">fuel.tool.xml.form</field>
+        <field name="model">fuel.tool.xml</field>
+        <field name="arch" type="xml">
+            <field name="report" invisible="1"/>
+            <form>
+                <button name="download_xml" string="Descargar XML" type="object" class="oe_highlight"/>
+                <field name="binary_string" invisible="1"/>
+                <field name="binary_xml" filename="binary_string" readonly="1"/>
             </form>
         </field>
     </record>
