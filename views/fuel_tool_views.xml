@@ -57,18 +57,18 @@
         </field>
     </record>
 
-    <!--<record id="fuel_tool_xml_form" model="ir.ui.view">-->
-        <!--<field name="name">fuel.tool.xml.form</field>-->
-        <!--<field name="model">fuel.tool.xml</field>-->
-        <!--<field name="arch" type="xml">-->
-            <!--<field name="report" invisible="1"/>-->
-            <!--<form>-->
-                <!--<button name="download_xml" string="Descargar XML" type="object" class="oe_highlight"/>-->
-                <!--<field name="binary_string" invisible="1"/>-->
-                <!--<field name="binary_xml" filename="binary_string" readonly="1"/>-->
-            <!--</form>-->
-        <!--</field>-->
-    <!--</record>-->
+    <record id="fuel_tool_xml_form" model="ir.ui.view">
+        <field name="name">fuel.tool.xml.form</field>
+        <field name="model">fuel.tool.xml</field>
+        <field name="arch" type="xml">
+            <field name="report" invisible="1"/>
+            <form>
+                <button name="download_xml" string="Descargar XML" type="object" class="oe_highlight"/>
+                <field name="binary_string" invisible="1"/>
+                <field name="binary_xml" filename="binary_string" readonly="1"/>
+            </form>
+        </field>
+    </record>
 
     <!--<record id="fuel_tool_tree" model="ir.ui.view">-->
         <!--<field name="name">fuel.tool.tree</field>-->
