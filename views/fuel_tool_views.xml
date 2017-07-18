@@ -22,7 +22,7 @@
                 <group>
                     <group>
                         <field name="file" widget="file"/>
-                        <field name="excluded"/>
+                        <!--<field name="excluded"/>-->
                     </group>
                 </group>
                 <notebook>
