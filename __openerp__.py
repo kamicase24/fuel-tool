@@ -8,7 +8,7 @@
     'version': '1.5',
     'depends': ['base'],
     'data': [
-        'data/base_action_fuel_tool.xml',
+        # 'data/base_action_fuel_tool.xml',
         'views/fuel_tool_views.xml',
     ]
 }
