@@ -35,7 +35,7 @@
                                 <field name="hour"/>
                                 <field name="gallons" string="Volume"/>
                                 <field name="month"/>
-                                <field name="supplier""/>
+                                <field name="supplier"/>
                                 <field name="license_plate"/>
                                 <field name="kilometer"/>
                                 <field name="fuel_type"/>
