@@ -22,7 +22,7 @@
                 <group>
                     <group>
                         <field name="file" widget="file"/>
-                        <!--<field name="excluded"/>-->
+                        <field name="custom_fields" widget="many2many_tags"/>
                     </group>
                 </group>
                 <notebook>
@@ -30,12 +30,12 @@
                         <field name="report" readonly="1">
                             <tree edit="false" create="false" colors="red: gallons == 0" default_order="gallons">
                                 <field name="id" invisible="1"/>
-                                <!--<field name="month"/>-->
-                                <field name="token"/>
-                                <field name="date"/>
+                                <field name="token" string="VehicleId"/>
+                                <field name="date" string="Fecha"/>
                                 <field name="hour"/>
-                                <field name="gallons"/>
-                                <field name="supplier"/>
+                                <field name="gallons" string="Volume"/>
+                                <field name="month"/>
+                                <field name="supplier""/>
                                 <field name="license_plate"/>
                                 <field name="kilometer"/>
                                 <field name="fuel_type"/>
@@ -70,20 +70,29 @@
         </field>
     </record>
 
-    <!--<record id="fuel_tool_tree" model="ir.ui.view">-->
-        <!--<field name="name">fuel.tool.tree</field>-->
-        <!--<field name="model">fuel.tool</field>-->
-        <!--<field name="arch" type="xml">-->
-            <!--<tree>-->
-
-            <!--</tree>-->
-        <!--</field>-->
-    <!--</record>-->
+    <record id="fuel_tool_config_tree" model="ir.ui.view">
+        <field name="name">fuel.tool.config.tree</field>
+        <field name="model">fuel.tool.fields</field>
+        <field name="arch" type="xml">
+            <tree editable="botton">
+                <field name="name"/>
+                <field name="category"/>
+                <field name="sequence"/>
+            </tree>
+        </field>
+    </record>
 
     <record id="fuel_tool_action" model="ir.actions.act_window">
         <field name="name">Fuel Tool</field>
         <field name="res_model">fuel.tool</field>
         <field name="view_mode">form</field>
+        <field name="view_type">form</field>
+    </record>
+
+    <record id="fuel_tool_fields_action" model="ir.actions.act_window">
+        <field name="name">Custom Fields</field>
+        <field name="res_model">fuel.tool.fields</field>
+        <field name="view_mode">tree</field>
         <field name="view_type">form</field>
     </record>
 
@@ -93,4 +102,24 @@
         action="fuel_tool_action"
     />
 
+    <menuitem
+        id="fuel_tool_submenu"
+        name="Herramienta"
+        parent="fuel_tool_main_menu"
+        action="fuel_tool_action"
+        sequence="1"
+    />
+
+    <menuitem
+        id="fuel_tool_config"
+        name="Configuración"
+        parent="fuel_tool_main_menu"
+        sequence="9"
+    />
+        <menuitem
+            id="fuel_tool_fields_menu"
+            name="Custom Fields"
+            parent="fuel_tool_config"
+            action="fuel_tool_fields_action"
+        />
 </odoo>

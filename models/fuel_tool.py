@@ -11,10 +11,13 @@ _logger = logging.getLogger(__name__)
 class FuelTool(models.Model):
     _name = 'fuel.tool'
 
+    def _default_custom_fields(self):
+        return self.env['fuel.tool.fields'].search([])
+
     file = fields.Binary(string='File')
     block_result = fields.Text(string='Resultado')
     report = fields.Many2many('fuel.tool.report', string='Reporte')
-    report_tag = fields.Many2many('fuel.tool.report', string='Excluidos')
+    custom_fields = fields.Many2many('fuel.tool.fields', string='Custom Fields', default=_default_custom_fields)
 
     def generate_xml(self):
 
@@ -70,7 +73,6 @@ class FuelTool(models.Model):
 
         sql = 'delete from fuel_tool_report'
         self.env.cr.execute(sql)
-
         i = 0
         fuel_report = self.env['fuel.tool.report']
         for line in sheet:
@@ -78,14 +80,14 @@ class FuelTool(models.Model):
                 i = 1
             else:
                 fuel_report.create({
-                    # 'month': line[1],
+                    'token': line[0],
                     'date': line[1],
                     'hour': line[2],
-                    'supplier': line[3],
-                    'token': line[4],
-                    'license_plate': line[5],
-                    'kilometer': line[6],
-                    'gallons': line[7],
+                    'gallons': line[3],
+                    'supplier': line[4],
+                    'month': line[5],
+                    'license_plate': line[6],
+                    'kilometer': line[7],
                     'fuel_type': line[8],
                     'prices': line[9],
                     'real_prices': line[10],
@@ -104,7 +106,11 @@ class FuelTool(models.Model):
     def create_xml(self):
 
         fuel_report = self.env['fuel.tool.report'].search([])
-        print fuel_report
+
+        custom_list = []
+        for custom_field in self.custom_fields:
+            custom_list.append(custom_field.name)
+        print custom_list
 
         template = '<?xml version="1.0" encoding="utf-8"?>\n'
         template += '<Fuel fileid="'+str(datetime.datetime.now())+'">\n'
@@ -116,55 +122,65 @@ class FuelTool(models.Model):
             template += '\t\t\t<Volume>'+str(line.gallons)+'</Volume>\n'
             template += '\t\t\t<CustomFields>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Tipo de combustible</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.fuel_type+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'fuel_type' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Tipo de combustible</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.fuel_type+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Costo del combustible</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+str(line.prices)+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'prices' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Costo del combustible</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+str(line.prices)+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Monto de la recarga</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+str(line.inv_prices)+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'inv_prices' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Monto de la recarga</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+str(line.inv_prices)+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Comentario</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.commentary+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'commentary' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Comentario</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.commentary+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Suplidor</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.supplier+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'supplier' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Suplidor</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.supplier+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Localidad</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.location+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'location' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Localidad</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.location+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Numero de Ticket</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.ticket_number+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'ticket_number' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Numero de Ticket</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.ticket_number+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Numero de Factura</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue></CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'inv_number' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Numero de Factura</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue></CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Modalidad de pago</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.payment_type+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'payment_type' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Modalidad de pago</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.payment_type+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
-            template += '\t\t\t\t<CustomField>\n'
-            template += '\t\t\t\t\t<CustomFieldName>Empresa</CustomFieldName>\n'
-            template += '\t\t\t\t\t<CustomFieldValue>'+line.partner+'</CustomFieldValue>\n'
-            template += '\t\t\t\t</CustomField>\n'
+            if 'partner' in custom_list:
+                template += '\t\t\t\t<CustomField>\n'
+                template += '\t\t\t\t\t<CustomFieldName>Empresa</CustomFieldName>\n'
+                template += '\t\t\t\t\t<CustomFieldValue>'+line.partner+'</CustomFieldValue>\n'
+                template += '\t\t\t\t</CustomField>\n'
 
             template += '\t\t\t</CustomFields>\n'
             template += '\t\t</Refill>\n'
@@ -188,7 +204,9 @@ class FuelToolSheet(models.TransientModel):
     binary_xml = fields.Binary(string='Descargar XML')
     binary_string = fields.Char('Descargar XML')
 
+    @api.onchange('report')
     def download_xml(self):
+        xml_read = False
         if platform == 'win32':
             xml_write = open('C:\Users\openpgsvc\comp_file.xml', 'w')
             xml_write.write(self.report)
@@ -199,9 +217,9 @@ class FuelToolSheet(models.TransientModel):
             xml_write.write(self.report)
             xml_write.close()
             xml_read = open('/home/administrator/comp_file.xml', 'r')
-            
+
         self.write({
-            'binary_string': 'fuel_file.xml',
+            'binary_string': 'fuel_file'+str(datetime.datetime.now().strftime('%d%m%y%H%M%S'))+'.xml',
             'binary_xml': base64.encodestring(xml_read.read())
         })
         return {'type': 'ir.action.do_nothing'}
@@ -210,14 +228,14 @@ class FuelToolSheet(models.TransientModel):
 class FuelToolReport(models.Model):
     _name = 'fuel.tool.report'
 
-    month = fields.Char(string='Mes')
+    token = fields.Char(string='Ficha', required=True)
     date = fields.Date(string='Día, Mes y Año', required=True)
     hour = fields.Char(string='Hora', required=True)
+    gallons = fields.Float(string='Galones', required=True)
+    month = fields.Char(string='Mes')
     supplier = fields.Char(string='Suplidor')
-    token = fields.Char(string='Ficha/VehicleId', required=True)
     license_plate = fields.Char(string='Placa')
     kilometer = fields.Char(string='Kilometraje')
-    gallons = fields.Float(string='Galones/Volume', required=True)
     fuel_type = fields.Char(string='Combustible')
     prices = fields.Float(string='Precios')
     real_prices = fields.Float(string='Precios Reales')
@@ -230,3 +248,17 @@ class FuelToolReport(models.Model):
     payment_type = fields.Char(string='Tipo de Pago')
     partner = fields.Char(string='Empresa')
     brigade = fields.Char(string='Brigada')
+
+
+class FuelToolFields(models.Model):
+    _name = 'fuel.tool.fields'
+
+    name = fields.Char(string='Nombre')
+    custom_name = fields.Char(string='Nombre de titulo')
+    category = fields.Selection([('char', 'Caracter'),
+                                 ('date', 'Fecha'),
+                                 ('time', 'Hora'),
+                                 ('integer', 'Número Entero'),
+                                 ('float', 'Número Decimal')], string='Catergoria/Tipo')
+    sequence = fields.Integer(string='Prioridad')
+

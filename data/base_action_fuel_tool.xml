@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="default_custom_fields_1" model="fuel.tool.fields">
+            <field name="name">supplier</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_2" model="fuel.tool.fields">
+            <field name="name">license_plate</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_3" model="fuel.tool.fields">
+            <field name="name">kilometer</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_4" model="fuel.tool.fields">
+            <field name="name">fuel_type</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_5" model="fuel.tool.fields">
+            <field name="name">prices</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_6" model="fuel.tool.fields">
+            <field name="name">real_prices</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_7" model="fuel.tool.fields">
+            <field name="name">inv_prices</field>
+            <field name="category">float</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_8" model="fuel.tool.fields">
+            <field name="name">difference</field>
+            <field name="category">float</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_9" model="fuel.tool.fields">
+            <field name="name">ticket_number</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_10" model="fuel.tool.fields">
+            <field name="name">responsable</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_11" model="fuel.tool.fields">
+            <field name="name">location</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_12" model="fuel.tool.fields">
+            <field name="name">commentary</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_13" model="fuel.tool.fields">
+            <field name="name">payment_type</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_14" model="fuel.tool.fields">
+            <field name="name">partner</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+
+        <record id="default_custom_fields_15" model="fuel.tool.fields">
+            <field name="name">brigade</field>
+            <field name="category">char</field>
+            <field name="sequence">99</field>
+        </record>
+    </data>
+</odoo>
