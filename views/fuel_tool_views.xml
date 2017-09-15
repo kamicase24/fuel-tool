@@ -11,7 +11,7 @@
                             type="object"
                             class="oe_highlight"
                     />
-                    ->
+
                     <button name="generate_xml"
                             string="XML"
                             type="object"
@@ -22,33 +22,67 @@
                 <group>
                     <group>
                         <field name="file" widget="file"/>
-                        <field name="custom_fields" widget="many2many_tags"/>
                     </group>
                 </group>
                 <notebook>
                     <page string="Lineas de Reporte">
                         <field name="report" readonly="1">
-                            <tree edit="false" create="false" colors="red: gallons == 0" default_order="gallons">
+                            <tree edit="false" create="false" colors="red: gallons == 0">
                                 <field name="id" invisible="1"/>
-                                <field name="token" string="VehicleId"/>
+                                <field name="asset" string="VehicleId"/>
                                 <field name="date" string="Fecha"/>
                                 <field name="hour"/>
                                 <field name="gallons" string="Volume"/>
-                                <field name="month"/>
-                                <field name="supplier"/>
-                                <field name="license_plate"/>
-                                <field name="kilometer"/>
-                                <field name="fuel_type"/>
-                                <field name="prices"/>
-                                <field name="real_prices"/>
-                                <field name="inv_prices"/>
-                                <field name="difference"/>
-                                <field name="ticket_number"/>
-                                <field name="responsable"/>
-                                <field name="location"/>
-                                <field name="commentary"/>
-                                <field name="payment_type"/>
-                                <field name="partner"/>
+                                <!--<field name="custom_field1"/>-->
+                                <!--<field name="custom_field2"/>-->
+                                <!--<field name="custom_field3"/>-->
+                                <field name="custom_field4"/>
+                                <field name="custom_field5"/>
+                                <field name="custom_field6"/>
+                                <field name="custom_field7"/>
+                                <field name="custom_field8"/>
+                                <field name="custom_field9"/>
+                                <field name="custom_field10"/>
+                                <field name="custom_field11"/>
+                                <field name="custom_field12"/>
+                                <field name="custom_field13"/>
+                                <field name="custom_field14"/>
+                                <field name="custom_field15"/>
+                                <field name="custom_field16"/>
+                                <field name="custom_field17"/>
+                                <field name="custom_field18"/>
+                                <field name="custom_field19"/>
+                                <field name="custom_field20"/>
+                                <field name="custom_field21"/>
+                                <field name="custom_field22"/>
+                                <field name="custom_field23"/>
+                                <field name="custom_field24"/>
+                                <field name="custom_field25"/>
+                                <field name="custom_field26"/>
+                                <field name="custom_field27"/>
+                                <field name="custom_field28"/>
+                                <field name="custom_field29"/>
+                                <field name="custom_field30"/>
+                                <field name="custom_field31"/>
+                                <field name="custom_field32"/>
+                                <field name="custom_field33"/>
+                                <field name="custom_field34"/>
+                                <field name="custom_field35"/>
+                                <field name="custom_field36"/>
+                                <field name="custom_field37"/>
+                                <field name="custom_field38"/>
+                                <field name="custom_field39"/>
+                                <field name="custom_field40"/>
+                                <field name="custom_field41"/>
+                                <field name="custom_field42"/>
+                                <field name="custom_field43"/>
+                                <field name="custom_field44"/>
+                                <field name="custom_field45"/>
+                                <field name="custom_field46"/>
+                                <field name="custom_field47"/>
+                                <field name="custom_field48"/>
+                                <field name="custom_field49"/>
+                                <field name="custom_field50"/>
                             </tree>
                         </field>
                     </page>
@@ -70,18 +104,6 @@
         </field>
     </record>
 
-    <record id="fuel_tool_config_tree" model="ir.ui.view">
-        <field name="name">fuel.tool.config.tree</field>
-        <field name="model">fuel.tool.fields</field>
-        <field name="arch" type="xml">
-            <tree editable="botton">
-                <field name="name"/>
-                <field name="category"/>
-                <field name="sequence"/>
-            </tree>
-        </field>
-    </record>
-
     <record id="fuel_tool_action" model="ir.actions.act_window">
         <field name="name">Fuel Tool</field>
         <field name="res_model">fuel.tool</field>
@@ -89,17 +111,11 @@
         <field name="view_type">form</field>
     </record>
 
-    <record id="fuel_tool_fields_action" model="ir.actions.act_window">
-        <field name="name">Custom Fields</field>
-        <field name="res_model">fuel.tool.fields</field>
-        <field name="view_mode">tree</field>
-        <field name="view_type">form</field>
-    </record>
-
     <menuitem
         id="fuel_tool_main_menu"
         name="Fuel Tool"
         action="fuel_tool_action"
+        web_icon="fuel_tool,static/src/img/icon.png"
     />
 
     <menuitem
@@ -116,10 +132,5 @@
         parent="fuel_tool_main_menu"
         sequence="9"
     />
-        <menuitem
-            id="fuel_tool_fields_menu"
-            name="Custom Fields"
-            parent="fuel_tool_config"
-            action="fuel_tool_fields_action"
-        />
+
 </odoo>

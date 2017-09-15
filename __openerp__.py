@@ -7,8 +7,9 @@
     'category': 'Uncategorized',
     'version': '1.5',
     'depends': ['base'],
+    'images': ['static/src/img/fuel_tool_icon.png'],
     'data': [
-        'data/base_action_fuel_tool.xml',
+        # 'data/base_action_fuel_tool.xml',
         'views/fuel_tool_views.xml',
     ]
 }
