@@ -44,7 +44,7 @@ class FuelTool(models.Model):
                     if sheet.cell(row, col).ctype == 3 and col == 1:
                         xls_date = xlrd.xldate_as_tuple(value, excel.datemode)
                         year, month, day, hour, minute, second = xls_date
-                        real_date = datetime.date(year, month, day).strftime('%d/%m/%y')
+                        real_date = datetime.date(year, month, day).strftime('%y-%m-%d')
                         value = real_date
 
                     elif sheet.cell(row, col).ctype == 3 and col == 2:
@@ -115,49 +115,48 @@ class FuelTool(models.Model):
         for k in _header:
             if k not in ('asset', 'date', 'hour', 'gallons', 'id'):
                 _header[k] = "\t\t\t\t\t<CustomFieldName>" + _header[k] + "</CustomFieldName>\n"
-        _logger.info(_header)
 
         # VALUES
         i = False
         fuel_report = self.env['fuel.tool.report'].search([])
         template = '<?xml version="1.0" encoding="utf-8"?>\n'
         template += '<Fuel fileid="'+str(datetime.datetime.now())+'">\n'
+        template += '\t<Refills>\n'
         for record in fuel_report:
             if i:
                 sql = "select * from fuel_tool_report where id = %s" % record.id
                 self.env.cr.execute(sql)
                 _values = self.env.cr.dictfetchall()
                 _values = dict((k, v) for k, v in _values[0].iteritems() if v)
-                _logger.info(_values)
-                template += '\t<Refills>\n'
-                template += '\t\t<Refill>\n'
                 for k in _values:
                     if k == 'asset':
-                        template += '\t\t\t<VehicleID>'+_values[k]+'</VehicleID>\n'
-                    elif k == 'date':
-                        pass
-                        # ts_date = _values[k]
-                    elif k == 'hour':
-                        pass
-                        # ts_hour = _values[k]
-                        # template += '\t\t\t<TimeStamp>'+ts_date+'T'+ts_hour+'</TimeStamp>\n'
-                    elif k == 'gallons':
-                        pass
-                        # template += '\t\t\t<Volume>'+str(_values[k])+'</Volume>\n'
-                        template += '\t\t\t<CustomFields>\n'
-                    elif k == 'id':
-                        pass
-                    else:
+                        vehicleid_template = '\t\t\t<VehicleID>'+_values[k]+'</VehicleID>\n'
+                    if k == 'date':
+                        timestamp_date = '\t\t\t<TimeStamp>'+_values[k]+'T'
+                    if k == 'hour':
+                        timestamp_hour = _values[k]+'</TimeStamp>\n'
+                    if k == 'gallons':
+                        volume_template = '\t\t\t<Volume>'+str(_values[k])+'</Volume>\n'
+                header_template = vehicleid_template+(timestamp_date+timestamp_hour)+volume_template
+
+                template += '\t\t<Refill>\n'
+                template += header_template
+                template += '\t\t\t<CustomFields>\n'
+                for k in _values:
+                    if k not in ('asset', 'date', 'hour', 'gallons', 'id'):
                         template += '\t\t\t\t<CustomField>\n'
                         template += str(_header[k])
-                        template += '\t\t\t\t\t<CustomFieldValue>'+str(_values[k])+'</CustomFieldValue>\n'
+                        if _values[k] == 'n/a':
+                            result = ''
+                        else:
+                            result = _values[k]
+                        template += '\t\t\t\t\t<CustomFieldValue>'+str(result)+'</CustomFieldValue>\n'
                         template += '\t\t\t\t</CustomField>\n'
                 template += '\t\t\t</CustomFields>\n'
                 template += '\t\t</Refill>\n'
-                template += '\t</Refills>\n'
-                break
             else:
                 i = True
+        template += '\t</Refills>\n'
         template += '</Fuel>'
 
         _logger.info(template)
@@ -165,63 +164,6 @@ class FuelTool(models.Model):
         self.env.cr.execute(sql)
         sql = "insert into fuel_tool_xml (report) values ('%s')" % template
         self.env.cr.execute(sql)
-
-        # for line in fuel_report:
-            # if 'fuel_type' in custom_list:
-            #
-            # if 'prices' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Costo del combustible</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+str(line.prices)+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'inv_prices' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Monto de la recarga</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+str(line.inv_prices)+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'commentary' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Comentario</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+line.commentary+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'supplier' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Suplidor</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+line.supplier+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'location' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Localidad</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+line.location+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'ticket_number' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Numero de Ticket</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+line.ticket_number+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'inv_number' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Numero de Factura</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue></CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'payment_type' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Modalidad de pago</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+line.payment_type+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
-            #
-            # if 'partner' in custom_list:
-            #     template += '\t\t\t\t<CustomField>\n'
-            #     template += '\t\t\t\t\t<CustomFieldName>Empresa</CustomFieldName>\n'
-            #     template += '\t\t\t\t\t<CustomFieldValue>'+line.partner+'</CustomFieldValue>\n'
-            #     template += '\t\t\t\t</CustomField>\n'
 
 
 class FuelToolSheet(models.TransientModel):
