@@ -44,7 +44,7 @@ class FuelTool(models.Model):
                     if sheet.cell(row, col).ctype == 3 and col == 1:
                         xls_date = xlrd.xldate_as_tuple(value, excel.datemode)
                         year, month, day, hour, minute, second = xls_date
-                        real_date = datetime.date(year, month, day).strftime('%y-%m-%d')
+                        real_date = datetime.date(year, month, day).strftime('%Y-%m-%d')
                         value = real_date
 
                     elif sheet.cell(row, col).ctype == 3 and col == 2:
